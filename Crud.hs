@@ -20,16 +20,18 @@ instance EntityForm Faq where
         <*> areq toField "Content" (faqContent <$> e)
         <*> areq toField "Order" (faqOrder <$> e)
 
+{- Utils -}
+fieldForm :: (RenderMessage site FormMessage, MonadHandler m,
+           HandlerSite m ~ site, ToField t, EntityFieldsForm a) =>
+    EntityField a t -> Maybe a -> AForm m t
+fieldForm field e = areq toField (fieldSettingsLabel $ fieldLabel field) (fieldValue field <$> e)
+
 {- EntityFieldsForm -}
 class EntityFieldsForm a where
     fieldValue :: EntityField a t -> a -> t
 
     -- FIXME: generalize to RenderMessage site msg
     fieldLabel :: EntityField a t -> Text
-
-    afield :: (RenderMessage site FormMessage, MonadHandler m,
-               HandlerSite m ~ site, ToField t) =>
-        EntityField a t -> Maybe a -> AForm m t
 
 instance EntityFieldsForm Faq where
     fieldValue FaqId = undefined -- FIXME
@@ -41,8 +43,6 @@ instance EntityFieldsForm Faq where
     fieldLabel FaqName = ("Name" :: Text)
     fieldLabel FaqContent = ("Content" :: Text)
     fieldLabel FaqOrder = ("Order" :: Text)
-
-    afield field e = areq toField (fieldSettingsLabel $ fieldLabel field) (fieldValue field <$> e)
 
 {- ToField -}
 class ToField a where
