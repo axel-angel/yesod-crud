@@ -11,20 +11,22 @@ import Control.Applicative
 
 {- EntityForm -}
 class EntityForm a where
-    aform :: (MonadHandler m, RenderMessage (HandlerSite m) FormMessage) =>
+    toAForm :: (MonadHandler m, RenderMessage (HandlerSite m) FormMessage) =>
         Maybe a -> AForm m a
 
 instance EntityForm Faq where
-    aform e = Faq
-        <$> areq toField "Name" (faqName <$> e)
-        <*> areq toField "Content" (faqContent <$> e)
-        <*> areq toField "Order" (faqOrder <$> e)
+    toAForm entityMay = Faq
+        <$> fieldForm FaqName entityMay
+        <*> fieldForm FaqContent entityMay
+        <*> fieldForm FaqOrder entityMay
 
 {- Utils -}
 fieldForm :: (RenderMessage site FormMessage, MonadHandler m,
            HandlerSite m ~ site, ToField t, EntityFieldsForm a) =>
     EntityField a t -> Maybe a -> AForm m t
-fieldForm field e = areq toField (fieldSettingsLabel $ fieldLabel field) (fieldValue field <$> e)
+fieldForm field entityMay = areq toField
+    (fieldSettingsLabel $ fieldLabel field)
+    (fieldValue field <$> entityMay)
 
 {- EntityFieldsForm -}
 class EntityFieldsForm a where
@@ -39,6 +41,7 @@ instance EntityFieldsForm Faq where
     fieldValue FaqContent = faqContent
     fieldValue FaqOrder = faqOrder
 
+    -- to move into an user-definable instance
     fieldLabel FaqId = ("Id" :: Text)
     fieldLabel FaqName = ("Name" :: Text)
     fieldLabel FaqContent = ("Content" :: Text)
