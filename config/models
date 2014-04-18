@@ -1,0 +1,12 @@
+User
+    ident Text
+    password Text Maybe
+    UniqueUser ident
+    deriving Typeable
+
+Faq
+    name Text
+    content Text
+    order Int
+        UniqueFaq name
+        deriving Show Eq Typeable
