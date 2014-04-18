@@ -1,8 +1,12 @@
+{-# LANGUAGE OverloadedStrings #-}
 module Crud where
 
+import Prelude
 import Model
-import Yesod.Form
-import Text.Shakespeare.I18N
+import Yesod
+--import Yesod.Form
+import Data.Text
+--import Text.Shakespeare.I18N
 import Control.Applicative
 
 {- EntityForm -}
@@ -12,20 +16,19 @@ class EntityForm a where
 
 instance EntityForm Faq where
     aform e = Faq
-        <$> areq field "Name" (faqName <$> e)
-        <*> areq field "Content" (faqContent <$> e)
-        <*> areq field "Order" (faqOrder <$> e)
+        <$> areq toField "Name" (faqName <$> e)
+        <*> areq toField "Content" (faqContent <$> e)
+        <*> areq toField "Order" (faqOrder <$> e)
 
 {- EntityFieldsForm -}
 class EntityFieldsForm a where
     fieldValue :: EntityField a t -> a -> t
 
-    fieldLabel :: (RenderMessage site msg, MonadHandler m,
-               HandlerSite m ~ site) =>
-        EntityField a t -> msg
+    -- FIXME: generalize to RenderMessage site msg
+    fieldLabel :: EntityField a t -> Text
 
     afield :: (RenderMessage site FormMessage, MonadHandler m,
-               HandlerSite m ~ site) =>
+               HandlerSite m ~ site, ToField t) =>
         EntityField a t -> Maybe a -> AForm m t
 
 instance EntityFieldsForm Faq where
@@ -34,20 +37,20 @@ instance EntityFieldsForm Faq where
     fieldValue FaqContent = faqContent
     fieldValue FaqOrder = faqOrder
 
-    fieldLabel FaqId = SomeMessage $ ToMessage "Id"
-    fieldLabel FaqName = SomeMessage $ ToMessage "Name"
-    fieldLabel FaqContent = SomeMessage $ ToMessage "Content"
-    fieldLabel FaqOrder = SomeMessage $ ToMessage "Order"
+    fieldLabel FaqId = ("Id" :: Text)
+    fieldLabel FaqName = ("Name" :: Text)
+    fieldLabel FaqContent = ("Content" :: Text)
+    fieldLabel FaqOrder = ("Order" :: Text)
 
-    afield field e = areq field fieldLabel field (fieldValue field <$> e)
+    afield field e = areq toField (fieldSettingsLabel $ fieldLabel field) (fieldValue field <$> e)
 
 {- ToField -}
 class ToField a where
-    field :: Monad m => RenderMessage (HandlerSite m) FormMessage =>
+    toField :: Monad m => RenderMessage (HandlerSite m) FormMessage =>
         Field m a
 
 instance ToField Text where
-    field = textField
+    toField = textField
 
 instance ToField Int where
-    field = intField
+    toField = intField
