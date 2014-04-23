@@ -9,6 +9,39 @@ import Data.Text
 --import Text.Shakespeare.I18N
 import Control.Applicative
 
+{- EntityCrud -}
+class EntityCrud a where
+    render :: Monad m => FormRender m a
+    render = renderDivs
+
+    addWidget :: (RenderMessage (HandlerSite m) FormMessage, MonadResource m,
+            MonadHandler m, EntityField a (KeyBackend bak a)) =>
+        m (xml, Maybe FaqId)
+
+instance EntityCrud Faq where
+    addWidget = do
+        --let renderedForm = renderDivs $ toAForm (Nothing :: Maybe Faq)
+        _ <- runDB $ selectList ([]::[Filter Faq]) []
+        ((result, formWidget), formEnctype) <- runFormPost $ renderDivs $ toAForm (Nothing :: Maybe Faq)
+        let _ = result :: FormResult Faq
+            _ = formEnctype :: Enctype
+
+        {-
+        fIdMay <- case result of
+             FormSuccess f -> Just <$> (runDB $ insert f)
+             _ -> return Nothing
+         -}
+
+        Just thisRoute <- getCurrentRoute
+        let form = [whamlet|
+            <form method=post action=@{thisRoute} enctype=#{formEnctype}>
+              ^{formWidget}
+              <button type=submit>Send it
+        |]
+
+        return (form, undefined)
+        --return (form, fIdMay)
+
 {- EntityForm -}
 class EntityForm a where
     toAForm :: (MonadHandler m, RenderMessage (HandlerSite m) FormMessage) =>
