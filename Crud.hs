@@ -14,14 +14,21 @@ class EntityCrud a where
     render :: Monad m => FormRender m a
     render = renderDivs
 
+    {-
     addWidget :: (RenderMessage (HandlerSite m) FormMessage, MonadResource m,
             MonadHandler m, EntityField a (KeyBackend bak a)) =>
         m (xml, Maybe FaqId)
+    -}
+    readWidget :: (RenderMessage (HandlerSite m) FormMessage, MonadResource m,
+            MonadHandler m, EntityField a (KeyBackend bak a)) =>
+        m xml
 
 instance EntityCrud Faq where
+    {-
     addWidget = do
         --let renderedForm = renderDivs $ toAForm (Nothing :: Maybe Faq)
-        _ <- runDB $ selectList ([]::[Filter Faq]) []
+        t <- runDB $ selectList ([]::[Filter Faq]) []
+        let n = map (faqName . entityVal) t
         ((result, formWidget), formEnctype) <- runFormPost $ renderDivs $ toAForm (Nothing :: Maybe Faq)
         let _ = result :: FormResult Faq
             _ = formEnctype :: Enctype
@@ -41,6 +48,16 @@ instance EntityCrud Faq where
 
         return (form, undefined)
         --return (form, fIdMay)
+    -}
+    readWidget = do
+        xs <- runDB $ selectList ([]::[Filter Faq]) []
+
+        let widget = [whamlet|
+            $forall Entity eId e <- xs
+                <span>#{show eId}
+                <span>#{show e}
+        |]
+        return widget
 
 {- EntityForm -}
 class EntityForm a where
