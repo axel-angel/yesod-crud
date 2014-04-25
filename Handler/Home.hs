@@ -13,10 +13,15 @@ import Crud
 -- inclined, or create a single monolithic file.
 handleHomeR :: Handler Html
 handleHomeR = do
+    {-
     (fForm, fIdMay) <- addWidget
     let _ = fIdMay :: Maybe FaqId
+    -}
+
+    faqs <- runDB $ selectList ([]::[Filter Faq]) []
+    (rWid, xs) <- readWidget
+    let _ = rWid :: WidgetT App Handler ()
+    let _ = xs :: [Entity Faq]
 
     defaultLayout $ do
-        aDomId <- newIdent
-        setTitle "Welcome To Yesod!"
         $(widgetFile "homepage")

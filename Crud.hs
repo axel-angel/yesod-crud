@@ -9,55 +9,23 @@ import Data.Text (Text)
 --import Text.Shakespeare.I18N
 import Control.Applicative
 
-{- EntityCrud -}
-class EntityCrud a where
-    render :: Monad m => FormRender m a
-    render = renderDivs
+readWidget :: (MonadHandler m, m ~ HandlerT site IO,
+        YesodPersist site,
+        PersistQuery (YesodPersistBackend site (HandlerT site IO)),
+        PersistMonadBackend (YesodPersistBackend site (HandlerT site IO)) ~ PersistEntityBackend val,
+        PersistEntity val,
+        Show val)
+    => m (WidgetT site m (), [Entity val])
+readWidget = do
+    xs <- runDB $ selectList [] []
 
-    {-
-    addWidget :: (RenderMessage (HandlerSite m) FormMessage, MonadResource m,
-            MonadHandler m, EntityField a (KeyBackend bak a)) =>
-        m (xml, Maybe FaqId)
-    -}
-    readWidget :: (RenderMessage (HandlerSite m) FormMessage, MonadResource m,
-            MonadHandler m, EntityField a (KeyBackend bak a)) =>
-        m xml
+    let widget = [whamlet|
+        $forall Entity eId e <- xs
+            <span>#{show eId}
+            <span>#{show e}
+    |]
 
-instance EntityCrud Faq where
-    {-
-    addWidget = do
-        --let renderedForm = renderDivs $ toAForm (Nothing :: Maybe Faq)
-        t <- runDB $ selectList ([]::[Filter Faq]) []
-        let n = map (faqName . entityVal) t
-        ((result, formWidget), formEnctype) <- runFormPost $ renderDivs $ toAForm (Nothing :: Maybe Faq)
-        let _ = result :: FormResult Faq
-            _ = formEnctype :: Enctype
-
-        {-
-        fIdMay <- case result of
-             FormSuccess f -> Just <$> (runDB $ insert f)
-             _ -> return Nothing
-         -}
-
-        Just thisRoute <- getCurrentRoute
-        let form = [whamlet|
-            <form method=post action=@{thisRoute} enctype=#{formEnctype}>
-              ^{formWidget}
-              <button type=submit>Send it
-        |]
-
-        return (form, undefined)
-        --return (form, fIdMay)
-    -}
-    readWidget = do
-        xs <- runDB $ selectList ([]::[Filter Faq]) []
-
-        let widget = [whamlet|
-            $forall Entity eId e <- xs
-                <span>#{show eId}
-                <span>#{show e}
-        |]
-        return widget
+    return (widget, xs)
 
 {- EntityForm -}
 class EntityForm a where
