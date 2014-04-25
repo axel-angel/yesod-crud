@@ -5,7 +5,7 @@ import Prelude
 import Model
 import Yesod
 --import Yesod.Form
-import Data.Text
+import Data.Text (Text)
 --import Text.Shakespeare.I18N
 import Control.Applicative
 
