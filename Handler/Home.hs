@@ -1,4 +1,4 @@
-{-# LANGUAGE TupleSections, OverloadedStrings #-}
+{-# LANGUAGE TupleSections, OverloadedStrings, ScopedTypeVariables #-}
 module Handler.Home where
 
 import Import
@@ -18,8 +18,7 @@ handleHomeR = do
     let _ = fIdMay :: Maybe FaqId
     -}
 
-    (rWid, xs) <- readWidget
-    let _ = xs :: [Entity Faq]
+    (rWid, xs :: [Entity Faq]) <- readWidget
 
     defaultLayout $ do
         $(widgetFile "homepage")
