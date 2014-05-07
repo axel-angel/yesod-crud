@@ -1,10 +1,4 @@
 <h1>_{MsgHello}
 
-<ul>
-    $forall Entity fId f <- faqs
-        <li>
-            <span>#{faqName f}
-            <span>#{faqContent f}
-
 <div>
     ^{rWid}

@@ -18,7 +18,6 @@ handleHomeR = do
     let _ = fIdMay :: Maybe FaqId
     -}
 
-    faqs <- runDB $ selectList ([]::[Filter Faq]) []
     (rWid, xs) <- readWidget
     let _ = xs :: [Entity Faq]
 

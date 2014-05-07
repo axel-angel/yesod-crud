@@ -21,8 +21,9 @@ readWidget = do
 
     let widget = [whamlet|
         $forall Entity eId e <- xs
-            <span>#{show eId}
-            <span>#{show e}
+            <ul>
+                <li>#{show eId}
+                <li>#{show e}
     |]
 
     return (widget, xs)
