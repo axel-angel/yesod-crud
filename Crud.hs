@@ -15,7 +15,7 @@ readWidget :: (MonadHandler m, m ~ HandlerT site IO,
         PersistMonadBackend (YesodPersistBackend site (HandlerT site IO)) ~ PersistEntityBackend val,
         PersistEntity val,
         Show val)
-    => m (WidgetT site m (), [Entity val])
+    => m (WidgetT site IO (), [Entity val])
 readWidget = do
     xs <- runDB $ selectList [] []
 

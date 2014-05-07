@@ -20,7 +20,6 @@ handleHomeR = do
 
     faqs <- runDB $ selectList ([]::[Filter Faq]) []
     (rWid, xs) <- readWidget
-    let _ = rWid :: WidgetT App Handler ()
     let _ = xs :: [Entity Faq]
 
     defaultLayout $ do
