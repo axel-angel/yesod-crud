@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, ExistentialQuantification #-}
 module Crud where
 
 import Prelude
@@ -8,6 +8,7 @@ import Yesod
 import Data.Text (Text)
 --import Text.Shakespeare.I18N
 import Control.Applicative
+import Text.Blaze (ToMarkup)
 
 viewWidget :: (MonadHandler m, m ~ HandlerT site IO,
         YesodPersist site,
@@ -18,12 +19,18 @@ viewWidget :: (MonadHandler m, m ~ HandlerT site IO,
     => m (WidgetT site IO (), [Entity val])
 viewWidget = do
     xs <- runDB $ selectList [] []
+    let fields = tableFields :: [TableFieldHtml Faq]
 
     let widget = [whamlet|
-        $forall Entity eId e <- xs
-            <ul>
-                <li>#{show eId}
-                <li>#{show e}
+        <table>
+            <thead>
+                $forall TableFieldHtml f <- fields
+                    <th>#{fieldLabel f}
+            <tbody>
+                $forall Entity eId e <- xs
+                    <tr>
+                        <td>#{show eId}
+                        <td>#{show e}
     |]
 
     return (widget, xs)
@@ -47,12 +54,17 @@ fieldForm field entityMay = areq toField
     (fieldSettingsLabel $ fieldLabel field)
     (fieldValue field <$> entityMay)
 
+{- DataWrapper for tableFields -}
+data TableFieldHtml a = forall b c. (c ~ EntityField a b, ToMarkup b) => TableFieldHtml c
+
 {- EntityFieldsForm -}
 class EntityFieldsForm a where
     fieldValue :: EntityField a t -> a -> t
 
     -- FIXME: generalize to RenderMessage site msg
     fieldLabel :: EntityField a t -> Text
+
+    tableFields :: [TableFieldHtml a]
 
 instance EntityFieldsForm Faq where
     fieldValue FaqId = undefined -- FIXME
@@ -61,10 +73,12 @@ instance EntityFieldsForm Faq where
     fieldValue FaqOrder = faqOrder
 
     -- to move into an user-definable instance
-    fieldLabel FaqId = ("Id" :: Text)
-    fieldLabel FaqName = ("Name" :: Text)
-    fieldLabel FaqContent = ("Content" :: Text)
-    fieldLabel FaqOrder = ("Order" :: Text)
+    fieldLabel FaqId = "Id" :: Text
+    fieldLabel FaqName = "Name" :: Text
+    fieldLabel FaqContent = "Content" :: Text
+    fieldLabel FaqOrder = "Order" :: Text
+
+    tableFields = [TableFieldHtml FaqId, TableFieldHtml FaqName, TableFieldHtml FaqContent, TableFieldHtml FaqOrder]
 
 {- ToField -}
 class ToField a where
