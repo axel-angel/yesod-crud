@@ -18,7 +18,7 @@ handleHomeR = do
     let _ = fIdMay :: Maybe FaqId
     -}
 
-    (rWid, xs :: [Entity Faq]) <- readWidget
+    (viewW, _ :: [Entity Faq]) <- viewWidget
 
     defaultLayout $ do
         $(widgetFile "homepage")

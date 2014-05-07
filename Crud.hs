@@ -9,14 +9,14 @@ import Data.Text (Text)
 --import Text.Shakespeare.I18N
 import Control.Applicative
 
-readWidget :: (MonadHandler m, m ~ HandlerT site IO,
+viewWidget :: (MonadHandler m, m ~ HandlerT site IO,
         YesodPersist site,
         PersistQuery (YesodPersistBackend site (HandlerT site IO)),
         PersistMonadBackend (YesodPersistBackend site (HandlerT site IO)) ~ PersistEntityBackend val,
         PersistEntity val,
         Show val)
     => m (WidgetT site IO (), [Entity val])
-readWidget = do
+viewWidget = do
     xs <- runDB $ selectList [] []
 
     let widget = [whamlet|
