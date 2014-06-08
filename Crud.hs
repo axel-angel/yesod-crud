@@ -24,8 +24,8 @@ viewWidget = do
     let widget = [whamlet|
         <table>
             <thead>
-                $forall TableFieldHtml f <- fields
-                    <th>#{fieldLabel f}
+                $forall tfHtml <- fields
+                    <th>#{fieldLabel $ unTableFieldHtml tfHtml}
             <tbody>
                 $forall Entity eId e <- xs
                     <tr>
@@ -55,7 +55,7 @@ fieldForm field entityMay = areq toField
     (fieldValue field <$> entityMay)
 
 {- DataWrapper for tableFields -}
-data TableFieldHtml a = forall b c. (c ~ EntityField a b, ToMarkup b) => TableFieldHtml c
+data TableFieldHtml a = forall b c. (c ~ EntityField a b, ToMarkup b) => TableFieldHtml { unTableFieldHtml :: c }
 
 {- EntityFieldsForm -}
 class EntityFieldsForm a where
@@ -78,7 +78,8 @@ instance EntityFieldsForm Faq where
     fieldLabel FaqContent = "Content" :: Text
     fieldLabel FaqOrder = "Order" :: Text
 
-    tableFields = [TableFieldHtml FaqId, TableFieldHtml FaqName, TableFieldHtml FaqContent, TableFieldHtml FaqOrder]
+    -- FIXME: FaqId is missing
+    tableFields = [TableFieldHtml FaqName, TableFieldHtml FaqContent, TableFieldHtml FaqOrder]
 
 {- ToField -}
 class ToField a where
