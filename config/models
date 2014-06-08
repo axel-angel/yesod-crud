@@ -9,4 +9,4 @@ Faq
     content Text
     order Int
         UniqueFaq name
-        deriving Show Eq Typeable Data
+        deriving Show Eq
