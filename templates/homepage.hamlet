@@ -1,4 +1,6 @@
 <h1>_{MsgHello}
 
 <div>
-    ^{viewW}
+    <form type=POST enctype=#{fEnc}>
+        ^{widget}
+        <button type=submit>Send

@@ -13,12 +13,8 @@ import Crud
 -- inclined, or create a single monolithic file.
 handleHomeR :: Handler Html
 handleHomeR = do
-    {-
-    (fForm, fIdMay) <- addWidget
-    let _ = fIdMay :: Maybe FaqId
-    -}
-
-    (viewW, _ :: [Entity Faq]) <- viewWidget
+    let aForm = toAForm (Nothing :: Maybe Faq)
+    ((fRes, widget), fEnc) <- runFormPost $ renderDivs aForm
 
     defaultLayout $ do
         $(widgetFile "homepage")
